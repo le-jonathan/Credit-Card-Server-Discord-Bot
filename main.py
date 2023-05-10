@@ -10,7 +10,7 @@ bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
 RULES_CHANNEL_ID = 932447065370398791
 REFERRALS_CHANNEL_ID = 1105204207172190368
-DISCORD_LOGS_CHANNEL_ID = 1105328983245082725
+NEEDS_HELP_CHANNEL_ID = 1105328983245082725
 COOLDOWN_TIME = 7*24*60*60
 GUILD_ID = 931760921825665034
 DATA_FILE = "data.json"
@@ -131,7 +131,7 @@ async def process_diamond_member_reply(message):
     elif message.content.lower() == "i need help":
         help_needed_role = discord.utils.get(guild.roles, name="I need help")
         await member.add_roles(help_needed_role)
-        logs_channel = bot.get_channel(DISCORD_LOGS_CHANNEL_ID)
+        logs_channel = bot.get_channel(NEEDS_HELP_CHANNEL_ID)
         await logs_channel.send(f"{member.mention} needs help!")
 
 async def create_rules_message():
