@@ -157,15 +157,12 @@ async def on_raw_reaction_add(payload):
 @bot.command()
 @commands.has_any_role('Moderator', 'Owner', 'Intern')
 async def clear(ctx, user: discord.Member):
-    print(f"Clear command received for user: {user.id}")
     if user.id in last_message:
         del last_message[user.id]
         data["last_message"] = {str(user_id): timestamp.isoformat() for user_id, timestamp in last_message.items()}
         save_data(data)
-        print(f"Cleared cooldown for user: {user.id}")
         await ctx.send(f"{user.mention}'s cooldown has been cleared.")
     else:
-        print(f"User {user.id} doesn't have an active cooldown.")
         await ctx.send(f"{user.mention} doesn't have an active cooldown.")
 
 my_secret = os.environ['token']
