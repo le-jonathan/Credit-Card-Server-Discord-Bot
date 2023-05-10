@@ -143,7 +143,7 @@ async def create_rules_message():
     
     rules_message_part1 = """
     ```yaml
-Welcome to The Credit Community! :tada:
+Welcome to The Credit Community!
 
 Please take a moment to read and adhere to the following rules:
 
@@ -196,7 +196,7 @@ THE CREDIT COMMUNITY RULES
 Breaking any of the following rules may result in a timeout or ban. If we miss any rule breakers, please @ owners or staff immediately.
     ```
 
-    React with a ✅ below to verify that you have read and agree to the rules.
+React with a ✅ below to verify that you have read and agree to the rules.
     """
     
     message1 = await channel.send(rules_message_part1)
