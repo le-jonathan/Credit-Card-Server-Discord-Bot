@@ -155,15 +155,18 @@ async def on_raw_reaction_add(payload):
         await member.add_roles(verified_role)
 
 @bot.command()
-@commands.has_role("Moderator")
-async def clear(ctx, member: discord.Member):
-    if member.id in last_message:
-        del last_message[member.id]
+@commands.has_any_role('Moderator', 'Owner', 'Intern')
+async def clear(ctx, user: discord.Member):
+    print(f"Clear command received for user: {user.id}")
+    if user.id in last_message:
+        del last_message[user.id]
         data["last_message"] = {str(user_id): timestamp.isoformat() for user_id, timestamp in last_message.items()}
         save_data(data)
-        await ctx.send(f"{member.mention}'s timer has been cleared.")
+        print(f"Cleared cooldown for user: {user.id}")
+        await ctx.send(f"{user.mention}'s cooldown has been cleared.")
     else:
-        await ctx.send(f"{member.mention} does not have an active timer.")
+        print(f"User {user.id} doesn't have an active cooldown.")
+        await ctx.send(f"{user.mention} doesn't have an active cooldown.")
 
 my_secret = os.environ['token']
 bot.run(my_secret)
