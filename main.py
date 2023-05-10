@@ -8,11 +8,11 @@ from discord.utils import find
 
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
-RULES_CHANNEL_ID = 932447065370398791
-REFERRALS_CHANNEL_ID = 1105204207172190368
-NEEDS_HELP_CHANNEL_ID = 1105328983245082725
+RULES_CHANNEL_ID = 1105358413233397820
+REFERRALS_CHANNEL_ID = 1088605987851735060
+DISCORD_LOGS_CHANNEL_ID = 1105251500890017842
 COOLDOWN_TIME = 7*24*60*60
-GUILD_ID = 931760921825665034
+GUILD_ID = 1088597472764502105  # Replace with the actual guild ID
 DATA_FILE = "data.json"
 
 def load_data():
@@ -50,8 +50,10 @@ async def on_message(message):
         has_higher_level_role = False
 
     if message.channel.id == REFERRALS_CHANNEL_ID:
+        
+        is_moderator = any([role.name == "Moderator" for role in message.author.roles])
 
-        if message.author.id in last_message:
+        if not is_moderator and message.author.id in last_message:
             if (datetime.datetime.now() - last_message[message.author.id]).total_seconds() < COOLDOWN_TIME:
                 await message.delete()
 
@@ -99,49 +101,34 @@ async def on_message(message):
 
 @bot.event
 async def on_member_update(before, after):
-    diamond_status_role_name = "Diamond Status"
     diamond_role_name = "Diamond"
-
-    had_diamond_status_role = find(lambda r: r.name == diamond_status_role_name, before.roles)
-    has_diamond_status_role = find(lambda r: r.name == diamond_status_role_name, after.roles)
-
-    if has_diamond_status_role and not had_diamond_status_role:
+    
+    if find(lambda r: r.name == diamond_role_name, after.roles) and not find(lambda r: r.name == diamond_role_name, before.roles):
         has_higher_level_role = any([r.name.startswith("Level ") and int(r.name.split(" ")[-1]) >= 10 for r in after.roles])
         if has_higher_level_role:
-            diamond_role = discord.utils.get(after.guild.roles, name=diamond_role_name)
-            await after.add_roles(diamond_role)
+            certified_diamond_role = discord.utils.get(after.guild.roles, name="Certified Diamond")
+            await after.add_roles(certified_diamond_role)
             await after.send("Welcome to the Diamond Membership! You are level 10 or above, therefore you have direct access to the full Diamond Membership. Remember to stay active to retain full Diamond Membership.")
         else:
-            await after.send("You are now an active Diamond Status member! To receive full access as a Diamond member, you must confirm that you know that you must be active in the server to retain full Diamond membership. Please reply with \"I confirm\" or \"I need help\".")
-    
-    if had_diamond_status_role and not has_diamond_status_role:
-        diamond_role = find(lambda r: r.name == diamond_role_name, after.roles)
-        if diamond_role:
-            await after.remove_roles(diamond_role)
-            await after.send("Your Diamond role has been removed because you no longer have the Diamond Status role.")
+            await after.send("You are now an active Diamond member! To receive full access as a Diamond member, you must confirm that you know that you must be active in the server to retain full Diamond membership. Please reply with \"I confirm\" or \"I need help\".")
 
 async def process_diamond_member_reply(message):
     user = message.author
     guild = bot.get_guild(GUILD_ID)
     member = await guild.fetch_member(user.id)
     if message.content.lower() == "i confirm":
-        diamond_role = discord.utils.get(guild.roles, name="Diamond")
-        await member.add_roles(diamond_role)
-        await member.send("You have been given the Diamond role!")
+        certified_diamond_role = discord.utils.get(guild.roles, name="Certified Diamond")
+        await member.add_roles(certified_diamond_role)
+        await member.send("You have been given the Certified Diamond role!")
     elif message.content.lower() == "i need help":
-        help_needed_role = discord.utils.get(guild.roles, name="I need help")
+        help_needed_role = discord.utils.get(guild.roles, name="Help needed")
         await member.add_roles(help_needed_role)
-        logs_channel = bot.get_channel(NEEDS_HELP_CHANNEL_ID)
+        logs_channel = bot.get_channel(DISCORD_LOGS_CHANNEL_ID)
         await logs_channel.send(f"{member.mention} needs help!")
 
 async def create_rules_message():
     channel_id = RULES_CHANNEL_ID
     channel = bot.get_channel(channel_id)
-
-    async for message in channel.history(limit=100):
-        if message.author == bot.user:
-            await message.delete()
-
     rules_message = """
 React with a ✅ to verify that you have read and agree to the rules.
 """
@@ -156,6 +143,19 @@ async def on_raw_reaction_add(payload):
         verified_role = discord.utils.get(guild.roles, name="Verified")
         await member.add_roles(verified_role)
 
+@bot.command()
+@commands.has_role("Moderator")
+async def clear(ctx, member: discord.Member):
+    if member.id in last_message:
+        del last_message[member.id]
+        data["last_message"] = {str(user_id): timestamp.isoformat() for user_id, timestamp in last_message.items()}
+        save_data(data)
+        await ctx.send(f"{member.mention}'s timer has been cleared.")
+    else:
+        await ctx.send(f"{member.mention} does not have an active timer.")
+
 my_secret = os.environ['token']
 
+# Run the bot
 bot.run(my_secret)
+
