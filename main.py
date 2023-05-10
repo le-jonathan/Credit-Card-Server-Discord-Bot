@@ -134,17 +134,35 @@ async def process_diamond_member_reply(message):
         logs_channel = bot.get_channel(NEEDS_HELP_CHANNEL_ID)
         await logs_channel.send(f"{member.mention} needs help!")
 
-async def create_rules_message():
-    channel_id = RULES_CHANNEL_ID
-    channel = bot.get_channel(channel_id)
-    async for message in channel.history(limit=100):
-        if message.author == bot.user:
-            await message.delete()
+async def create_rules_message(channel):
     rules_message = """
-React with a ✅ to verify that you have read and agree to the rules.
-"""
-    message = await channel.send(rules_message)
-    await message.add_reaction('✅')
+    ```yaml
+    THE CREDIT COMMUNITY RULES
+    1. Be respectful, civil, and welcoming.
+    2. No discriminatory language, hate speech, or trolling.
+    3. No drama or toxicity; keep it in the DMs.
+    4. No bullying or harassment in any way, shape, or form.
+    5. Anything to target specific groups/individuals is prohibited.
+    6. Community members are free to express themselves openly and give constructive criticism and feedback.
+    7. Remain on topic and use channels correctly and appropriately. This includes being cautious when introducing conversations regarding controversial or sensitive topics.
+    8. No flooding or spamming in any of the channels, includes unnecessarily mentioning any user or group and sending excessive amounts of messages, emojis, videos, memes, pics, etc.
+    9. No NSFW or obscene content. This includes text, images, or links featuring nudity, sex, hard violence, or other graphically disturbing content.
+    10. No personal medical information, such as lab results, etc.
+    11. No humbly bragging, of any kind.
+    12. Community members should strive for a certain level of quality in their messages.
+    13. To post referrals, you must buy a premium membership to be able to post in the referral channel (post once a week). This includes the no use of hinting or trying to give someone your link in other channels.
+    14. No fake identities or catfishing of any kind.
+    15. Do not try and find personal information about other members.
+    16. We do not allow you to ask for handouts, such as credit card information.
+    17. Regardless of age, strive to treat each other as we would like to be treated ourselves.
+    18. We promote diversity and inclusivity and expect your interactions in this community to be respectful and guided by these rules.
+    19. By joining this community you are certifying/admitting that you are at least 18 years old.
+    20. Follow all staff instructions immediately and at all times.
+    ```
+
+    Breaking any of the following rules may result in a timeout or ban. If we miss any rule breakers please @ owners or staff immediately.
+    """
+    await channel.send(rules_message)
 
 @bot.event
 async def on_raw_reaction_add(payload):
