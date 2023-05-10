@@ -155,7 +155,7 @@ async def on_raw_reaction_add(payload):
         await member.add_roles(verified_role)
 
 @bot.command()
-@commands.has_any_role('Moderator', 'Owner', 'Intern)
+@commands.has_any_role('Moderator', 'Owner', 'Intern')
 async def clear(ctx, user: discord.Member):
     if user.id in last_message:
         del last_message[user.id]
