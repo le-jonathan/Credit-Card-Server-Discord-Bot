@@ -140,7 +140,8 @@ async def create_rules_message():
     async for message in channel.history(limit=100):
         if message.author == bot.user:
             await message.delete()
-    rules_message = """
+    
+    rules_message_part1 = """
     ```yaml
 Welcome to The Credit Community! :tada:
 
@@ -165,7 +166,11 @@ THE CREDIT COMMUNITY RULES
 8. No flooding or spamming chat messages. This includes unnecessarily mentioning any user or group, along with sending excessive amounts of messages, emojis, videos, memes, pics, etc.
 
 9. No NSFW or obscene content. This includes text, images, or links featuring nudity, sex, hard violence, or other graphically disturbing content.
+    ```
+    """
 
+    rules_message_part2 = """
+    ```yaml
 10. No personal medical information, such as lab results, etc.
 
 11. No bragging or attempting to make yourself seem better than another member.
@@ -193,8 +198,10 @@ Breaking any of the following rules may result in a timeout or ban. If we miss a
 
     React with a ✅ below to verify that you have read and agree to the rules.
     """
-    message = await channel.send(rules_message)
-    await message.add_reaction('✅')
+    
+    message1 = await channel.send(rules_message_part1)
+    message2 = await channel.send(rules_message_part2)
+    await message2.add_reaction('✅')
 
 @bot.event
 async def on_raw_reaction_add(payload):
