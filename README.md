@@ -12,6 +12,7 @@ This project is a Discord bot designed to manage user roles and messages within 
 - **Persistent Data Storage**: The bot uses a JSON file to store data related to user messages and roles, ensuring consistency even if the bot goes offline.
 
 ## Technologies Used
+- Amazon Web Services
 - Python
 - discord.py library
 
