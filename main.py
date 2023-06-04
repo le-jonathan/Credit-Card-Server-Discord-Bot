@@ -19,9 +19,13 @@ DATA_FILE = "data.json"
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
-            data = json.load(f)
+        data = json.load(f)
     else:
         data = {"last_message": {}, "messages_since_last_referral": {}, "required_messages": {}, "confirmation_sent": {}}
+    
+    if "confirmation_sent" not in data:
+        data["confirmation_sent"] = {}
+
     return data
 
 def save_data(data):
