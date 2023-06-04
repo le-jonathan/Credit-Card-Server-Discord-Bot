@@ -209,7 +209,7 @@ React with a ✅ below to verify that you have read and agree to the rules.
     message2 = await channel.send(rules_message_part2)
     await message2.add_reaction('✅')
 
-'''' Server no longer has the Verified role, reinstate if server wants to bring back the role
+''' Server no longer has the Verified role, reinstate if server wants to bring back the role
 @bot.event
 async def on_raw_reaction_add(payload):
     if payload.channel_id == RULES_CHANNEL_ID and payload.emoji.name == "✅":
@@ -217,7 +217,7 @@ async def on_raw_reaction_add(payload):
         member = guild.get_member(payload.user_id)
         verified_role = discord.utils.get(guild.roles, name="Verified")
         await member.add_roles(verified_role)
-        ''''
+        '''
 
 @bot.command()
 @commands.has_any_role('Moderator', 'Owner', 'Intern')
