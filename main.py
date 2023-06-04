@@ -21,16 +21,18 @@ def load_data():
         with open(DATA_FILE, "r") as f:
             data = json.load(f)
     else:
-        data = {"last_message": {}, "messages_since_last_referral": {}, "required_messages": {}}
+        data = {"last_message": {}, "messages_since_last_referral": {}, "required_messages": {}, "confirmation_sent": {}}
     return data
 
 def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f)
+
 data = load_data()
 last_message = {int(user_id): datetime.datetime.fromisoformat(timestamp) for user_id, timestamp in data["last_message"].items()}
 messages_since_last_referral = {int(user_id): count for user_id, count in data["messages_since_last_referral"].items()}
 required_messages = {int(user_id): count for user_id, count in data["required_messages"].items()}
+confirmation_sent = {int(user_id): datetime.datetime.fromisoformat(timestamp) for user_id, timestamp in data["confirmation_sent"].items()}
 
 @bot.event
 async def on_ready():
@@ -112,7 +114,9 @@ async def on_member_update(before, after):
             await after.send("Welcome to the Diamond Membership! You are level 10 or above, therefore you have direct access to the full Diamond Membership. Remember to stay active to retain full Diamond Membership.")
         else:
             await after.send("You are now an active Diamond Status member! To receive full access as a Diamond member, you must confirm that you know that you must be active in the server to retain full Diamond membership. Please reply with \"I confirm\" or \"I need help\".")
-    
+            confirmation_sent[after.id] = datetime.datetime.now()
+            data["confirmation_sent"] = {str(user_id): timestamp.isoformat() for user_id, timestamp in confirmation_sent.items()}
+            save_data(data)
     if had_diamond_status_role and not has_diamond_status_role:
         diamond_role = find(lambda r: r.name == diamond_role_name, after.roles)
         if diamond_role:
@@ -123,15 +127,17 @@ async def process_diamond_member_reply(message):
     user = message.author
     guild = bot.get_guild(GUILD_ID)
     member = await guild.fetch_member(user.id)
-    if message.content.lower() == "i confirm":
+    if message.content.lower() == "i confirm" and user.id in confirmation_sent:
         diamond_role = discord.utils.get(guild.roles, name="Diamond")
         await member.add_roles(diamond_role)
         await member.send("You have been given the Diamond role!")
+        del confirmation_sent[user.id]
+        data["confirmation_sent"] = {str(user_id): timestamp.isoformat() for user_id, timestamp in confirmation_sent.items()}
+        save_data(data)
     elif message.content.lower() == "i need help":
         help_needed_role = discord.utils.get(guild.roles, name="I need help")
         await member.add_roles(help_needed_role)
         logs_channel = bot.get_channel(DISCORD_LOGS_CHANNEL_ID)
-        logs_channel = bot.get_channel(NEEDS_HELP_CHANNEL_ID)
         await logs_channel.send(f"{member.mention} needs help!")
 
 async def create_rules_message():
@@ -203,6 +209,7 @@ React with a ✅ below to verify that you have read and agree to the rules.
     message2 = await channel.send(rules_message_part2)
     await message2.add_reaction('✅')
 
+'''' Server no longer has the Verified role, reinstate if server wants to bring back the role
 @bot.event
 async def on_raw_reaction_add(payload):
     if payload.channel_id == RULES_CHANNEL_ID and payload.emoji.name == "✅":
@@ -210,6 +217,7 @@ async def on_raw_reaction_add(payload):
         member = guild.get_member(payload.user_id)
         verified_role = discord.utils.get(guild.roles, name="Verified")
         await member.add_roles(verified_role)
+        ''''
 
 @bot.command()
 @commands.has_any_role('Moderator', 'Owner', 'Intern')
