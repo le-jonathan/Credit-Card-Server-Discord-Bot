@@ -117,7 +117,7 @@ async def on_member_update(before, after):
             await after.add_roles(diamond_role)
             await after.send("Welcome to the Diamond Membership! You are level 10 or above, therefore you have direct access to the full Diamond Membership. Remember to stay active to retain full Diamond Membership.")
         else:
-            await after.send("You are now an active Diamond Status member! To receive full access as a Diamond member, you must confirm that you know that you must be active in the server to retain full Diamond membership. Please reply with \"I confirm\" or \"I need help\".")
+            await after.send("You are now an active Diamond Status member! To receive full access to Diamond Status perks, please confirm that you understand that you must be ACTIVE in the server to retain your Diamond Status membership perks. If you do not meet the requirements, your role will be revoked until you meet those requirements again. Please reply with \"CONFIRM\" or \"HELP\" to indicate your understanding of this message.")
             confirmation_sent[after.id] = datetime.datetime.now()
             data["confirmation_sent"] = {str(user_id): timestamp.isoformat() for user_id, timestamp in confirmation_sent.items()}
             save_data(data)
@@ -131,19 +131,20 @@ async def process_diamond_member_reply(message):
     user = message.author
     guild = bot.get_guild(GUILD_ID)
     member = await guild.fetch_member(user.id)
-    if message.content.lower() == "i confirm" and user.id in confirmation_sent:
+    if message.content.lower() == "confirm" and user.id in confirmation_sent:
         diamond_role = discord.utils.get(guild.roles, name="Diamond")
         await member.add_roles(diamond_role)
-        await member.send("You have been given the Diamond role!")
+        await member.send("Thanks for confirming, you have been given the Diamond role. Welcome to the Diamond Status, and thank you for supporting thee server. You can always type \"HELP\" here to get help from a moderator!")
         del confirmation_sent[user.id]
         data["confirmation_sent"] = {str(user_id): timestamp.isoformat() for user_id, timestamp in confirmation_sent.items()}
         save_data(data)
-    elif message.content.lower() == "i need help":
-        help_needed_role = discord.utils.get(guild.roles, name="I need help")
+    elif message.content.lower() == "help":
+        help_needed_role = discord.utils.get(guild.roles, name="Help")
         await member.add_roles(help_needed_role)
         logs_channel = bot.get_channel(DISCORD_LOGS_CHANNEL_ID)
-        await logs_channel.send(f"{member.mention} needs help!")
-
+        moderator_role = discord.utils.get(guild.roles, name='Moderator')
+        await logs_channel.send(f"{member.mention} needs help! {moderator_role.mention}")
+        
 async def create_rules_message():
     channel_id = RULES_CHANNEL_ID
     channel = bot.get_channel(channel_id)
